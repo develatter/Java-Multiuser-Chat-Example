@@ -81,7 +81,7 @@ public class ClientViewController {
      * Initializes the listeners for the view
      */
     private void initListeners() {
-        view.getSendButton().addActionListener(_ -> {
+        view.getSendButton().addActionListener(e -> {
             if (view.getMessageField().getText().isBlank()) {
                 return;
             }

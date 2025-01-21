@@ -66,7 +66,7 @@ public class ServerViewController {
      * Initializes the listeners for the view
      */
     private void initListeneres() {
-        view.getAddClientButton().addActionListener(_ -> {
+        view.getAddClientButton().addActionListener(e  -> {
             new ClientViewController(userService);
             if (userService.getUserList().size() >= maxClients) {
                 view.getAddClientButton().setEnabled(false);
