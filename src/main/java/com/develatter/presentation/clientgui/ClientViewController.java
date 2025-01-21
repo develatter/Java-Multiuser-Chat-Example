@@ -18,7 +18,6 @@ public class ClientViewController {
     private final ClientView view;
     private User connectedUser;
     private final UserService userService;
-    private ClientConnection clientConnection;
     private Thread clientThread;
 
     /**
@@ -29,39 +28,29 @@ public class ClientViewController {
         view = new ClientView();
         view.setVisible(true);
         this.userService = userService;
-        connectClient();
-        showLoginDialog();
+        try {
+            showLoginDialog();
+        } catch (IOException e) {
+            ChatLogger.logf("Error: %s%n", e.getMessage());
+        }
         initChatService();
         initListeners();
-
-    }
-
-    /**
-     * Connects the client to the server
-     */
-    private void connectClient() {
-        try {
-            clientConnection = new ClientConnection();
-        } catch (IOException e) {
-            ChatLogger.logf("Error connecting to server: %s%n", e.getMessage());
-        }
     }
 
     /**
      * Shows a dialog to the user to input their name
      */
-    public void showLoginDialog() {
+    public void showLoginDialog() throws IOException{
         String name = JOptionPane.showInputDialog(view, "Enter your name:");
         try {
             connectedUser = userService.createUser(
                     name == null ? "" : name,
-                    clientConnection
+                    new ClientConnection()
             );
         } catch (UserAlreadyExistsException e) {
             JOptionPane.showMessageDialog(view, "User already exists, setting default name");
-            connectedUser = userService.createUser(clientConnection);
+            connectedUser = userService.createUser(new ClientConnection());
         }
-
         view.setTitle(connectedUser.getName());
     }
 
@@ -70,6 +59,7 @@ public class ClientViewController {
      */
     private void initChatService() {
         clientThread = new Thread(() -> {
+            ClientConnection clientConnection = connectedUser.getClientConnection();
             clientConnection.sendMessage(connectedUser.getName());
             String message = clientConnection.receiveMessage();
             view.getChatArea().append("You are now connected\n");
@@ -95,7 +85,7 @@ public class ClientViewController {
             if (view.getMessageField().getText().isBlank()) {
                 return;
             }
-            clientConnection.sendMessage(
+            connectedUser.getClientConnection().sendMessage(
                     connectedUser.getName() + ": " + view.getMessageField().getText()
             );
             SwingUtilities.invokeLater(() -> view.getMessageField().setText(""));
@@ -106,7 +96,7 @@ public class ClientViewController {
             public void windowClosing(WindowEvent e) {
                 clientThread.interrupt();
                 try {
-                    clientConnection.close();
+                    connectedUser.getClientConnection().close();
                 } catch (IOException ex) {
                     ChatLogger.logf("Error closing client connection: %s%n", ex.getMessage());
                 }

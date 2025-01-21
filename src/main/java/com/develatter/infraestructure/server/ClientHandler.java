@@ -17,7 +17,7 @@ import java.util.Queue;
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final UserService userService;
-    private Queue<PrintWriter> clientWriters;
+    private final Queue<PrintWriter> clientWriters;
 
     /**
      * Constructor that initializes the client handler with the client socket, client writers and user service.
