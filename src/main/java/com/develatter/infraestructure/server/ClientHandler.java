@@ -57,7 +57,6 @@ public class ClientHandler implements Runnable {
             ChatLogger.logf("Error handling client: %s%n", e.getMessage());
         }
 
-
     }
 
     /**
